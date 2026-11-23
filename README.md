@@ -19,7 +19,7 @@ Claude Code에서 **NS홈쇼핑(m.nsmall.com)** 방송 편성표, 방송 상품 
 ## 설치
 
 ```text
-/plugin marketplace add D:/clau_plugin
+/plugin marketplace add sinsu2/repo
 /plugin install nsmall-shopping@nsmall-plugins
 ```
 

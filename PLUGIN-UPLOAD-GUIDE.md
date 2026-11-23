@@ -54,17 +54,9 @@ python scripts/build-plugin-zip.py                                     # dist/ �
 
 디렉터리는 **ZIP을 받지 않고 GitHub 저장소를 받습니다.**
 
-### 1) GitHub 저장소 만들기
+### 1) GitHub 저장소
 
-이 폴더(`D:\clau_plugin`) 전체를 GitHub 저장소로 올립니다. 예: `nsmall/claude-plugins`
-
-로컬 git 저장소와 첫 커밋(`main` 브랜치)은 이미 만들어 두었습니다. GitHub에 빈 저장소를 만든 뒤 아래만 실행하면 됩니다.
-
-```bash
-cd D:/clau_plugin
-git remote add origin https://github.com/<조직>/<저장소>.git
-git push -u origin main
-```
+플러그인은 https://github.com/sinsu2/repo (`main` 브랜치)에 올라가 있습니다. 수정한 뒤에는 `version`을 올리고 commit, push만 하면 됩니다.
 
 - 검증과 리뷰 중에는 비공개 저장소여도 되지만, **게시(Publish) 전에는 공개**로 바꿔야 합니다.
 - 비공개 저장소로 제출하려면 push 권한이 있는 GitHub 계정을 연결하고, 저장소에 Claude GitHub App을 설치해야 합니다.
@@ -78,7 +70,7 @@ git push -u origin main
 
    | 항목 | 값 |
    |---|---|
-   | Repository | `https://github.com/<조직>/<저장소>` |
+   | Repository | `https://github.com/sinsu2/repo` |
    | Plugin path | `nsmall-shopping` |
    | Branch or tag | `main` (비워 두면 기본 브랜치) |
 
@@ -106,7 +98,7 @@ B의 1)처럼 GitHub에 push하면 끝입니다. `.claude-plugin/marketplace.jso
 사용자는 Claude Code에서 이렇게 설치합니다.
 
 ```text
-/plugin marketplace add <조직>/<저장소>
+/plugin marketplace add sinsu2/repo
 /plugin install nsmall-shopping@nsmall-plugins
 ```
 
