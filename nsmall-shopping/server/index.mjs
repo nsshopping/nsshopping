@@ -298,7 +298,7 @@ const TOOLS = [
 ];
 
 // ---------------------------------------------------------------- MCP / JSON-RPC (stdio)
-const SERVER_INFO = { name: "nsmall", title: "NS홈쇼핑", version: "0.2.1" };
+const SERVER_INFO = { name: "nsmall", title: "NS홈쇼핑", version: "0.2.2" };
 const SUPPORTED = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
 const send = (msg) => process.stdout.write(JSON.stringify(msg) + "\n");

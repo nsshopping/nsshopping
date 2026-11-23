@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "NS홈쇼핑 Claude Code 플러그인 마켓플레이스",
-    "version": "0.2.1"
+    "version": "0.2.2"
   },
   "plugins": [
     {
@@ -14,7 +14,7 @@
       "displayName": "NS홈쇼핑",
       "source": "./nsmall-shopping",
       "description": "NS홈쇼핑 방송 편성표, 방송 상품 검색, 상품 가격/혜택 조회",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "category": "shopping",
       "keywords": [
         "NS홈쇼핑",

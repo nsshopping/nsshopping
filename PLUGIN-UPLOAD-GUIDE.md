@@ -17,10 +17,35 @@ python scripts/build-plugin-zip.py                                     # dist/ �
 
 새 버전을 올릴 때마다 `nsmall-shopping/.claude-plugin/plugin.json`과 `.claude-plugin/marketplace.json`의 `version`을 같이 올립니다.
 
-`plugin.json`에서 실제 값으로 확인하거나 바꿔야 할 항목:
+### 브랜치 구성 (중요)
 
-| 항목 | 현재 값 |
+| 브랜치 | 용도 | `plugin.json` |
+|---|---|---|
+| `main` | 마켓플레이스 동기화(Claude 앱, Claude Code), ZIP 업로드 | 디렉터리 전용 필드 **없음** |
+| `directory` | 공식 디렉터리 제출 | `main` + 디렉터리 전용 필드 5개 (`icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, `termsOfServiceUrl`) |
+
+- Claude 앱은 디렉터리 전용 필드를 모르는 키로 보고 "unrecognized keys in plugin.json" 경고를 띄웁니다. 그래서 `main`에서는 이 필드를 뺐습니다.
+- 디렉터리는 이 필드를 `plugin.json`에서 읽기 때문에, 제출할 때는 `directory` 브랜치를 지정합니다.
+- 수정은 `main`에서 하고, 디렉터리에 반영할 때 `directory` 브랜치로 합칩니다.
+  ```bash
+  git checkout directory && git merge main && git push origin directory && git checkout main
+  ```
+
+`directory` 브랜치의 디렉터리 전용 필드 값:
+
+| 항목 | 값 |
 |---|---|
+| `displayName` | `NS홈쇼핑` (`main`에도 있음) |
+| `author.name` / `author.email` | `엔에스쇼핑` / `nsai@nsmall.com` (`main`에도 있음) |
+| `icon` | `./logo.png` (플러그인 폴더 맨 위의 NS 로고, 512×512 PNG) |
+| `supportUrl` | `https://m.nsmall.com/customer-center` |
+| `privacyPolicyUrl` | `https://m.nsmall.com/common/policy/privacy-policy` |
+| `termsOfServiceUrl` | `https://m.nsmall.com/common/terms/nsmall-terms` |
+| `documentationUrl` | `https://m.nsmall.com` |
+
+> **아이콘 표시에 대해:** 공식 문서상 `icon`은 디렉터리 목록에서만 쓰입니다. Claude 앱과 Claude Code의 플러그인 화면에서 아이콘을 지정하는 방법은 문서에 없어서, 앱에서는 로고가 보이지 않습니다. 디렉터리에 게시되면 로고가 표시됩니다.
+
+---|---|
 | `displayName` | `NS홈쇼핑` (화면에 보이는 이름. `name`은 `nsmall-shopping` 그대로 유지) |
 | `author.name` / `author.email` | `엔에스쇼핑` / `nsai@nsmall.com` |
 | `supportUrl` | `https://m.nsmall.com/customer-center` |
@@ -36,12 +61,12 @@ python scripts/build-plugin-zip.py                                     # dist/ �
 2. Claude에서 **사용자 지정(Customize) → 플러그인(Plugins) → 추가(Add) → 플러그인 업로드(Upload plugin)**를 선택하고 ZIP을 올립니다.
    - 조직 전체에 배포하려면 Owner가 **조직 설정(Organization settings) → 플러그인 및 스킬(Plugins & skills)**에서 올립니다.
    - 한도: 파일당 200MB, 플러그인당 5,000개 파일. 최상위 `bin/` 폴더는 거부됩니다.
-3. Claude Code에서 먼저 확인하려면: `claude --plugin-dir dist/nsmall-shopping-0.2.1.zip`
+3. Claude Code에서 먼저 확인하려면: `claude --plugin-dir dist/nsmall-shopping-0.2.2.zip`
 
 > **이름과 이미지 표시에 대해**
 > - 이름은 `plugin.json`의 `displayName`(`NS홈쇼핑`)으로 표시됩니다. 예전 ZIP(0.2.0)에는 이 필드가 없어 `nsmall-shopping`으로 보였습니다.
-> - 이미지 필드 `icon`은 공식 문서상 **디렉터리 목록(B)용**입니다. ZIP 업로드 화면이 이미지를 보여주는지는 문서에 나와 있지 않아, ZIP 업로드에서는 이미지가 계속 안 보일 수 있습니다. 디렉터리에 게시되면 로고가 표시됩니다.
-> - 이미 올린 0.2.0이 있으면 삭제하고 0.2.1 ZIP을 새로 올리세요.
+> - 이미지 필드 `icon`은 공식 문서상 **디렉터리 목록(B) 전용**이고, Claude 앱은 이 필드를 읽지 않습니다. 그래서 `main`과 ZIP에서는 빼 두었고, 앱에서는 로고가 보이지 않습니다. 디렉터리에 게시되면 로고가 표시됩니다.
+> - 이미 올린 이전 버전이 있으면 삭제하고 새 ZIP을 올리세요.
 
 > **주의: 로컬 MCP 서버는 claude.ai 웹 채팅에서 실행되지 않습니다.**
 > 웹 채팅에서는 스킬만 동작하고, 스킬에 적힌 대로 웹 검색과 페치로 편성표 API(`mapi.nsmall.com`)를 직접 읽어 답합니다.
@@ -72,9 +97,9 @@ python scripts/build-plugin-zip.py                                     # dist/ �
    |---|---|
    | Repository | `https://github.com/nsshopping/repo` |
    | Plugin path | `nsmall-shopping` |
-   | Branch or tag | `main` (비워 두면 기본 브랜치) |
+   | Branch or tag | `directory` (아이콘과 정책 URL이 들어 있는 제출용 브랜치) |
 
-   표시 이름(`NS홈쇼핑`), 로고(`./logo.png`), 설명, 정책 URL은 `plugin.json`과 `README.md`에서 자동으로 읽힙니다.
+   표시 이름(`NS홈쇼핑`), 로고(`./logo.png`), 설명, 정책 URL은 `directory` 브랜치의 `plugin.json`과 `README.md`에서 자동으로 읽힙니다.
    Validate에서 `displayName` 문자 체계 경고("한 가지 문자 체계로 작성")가 나오면 `NS홈쇼핑`(영문+한글 혼합) 때문이므로, 한글만 쓰는 `엔에스홈쇼핑`으로 바꿉니다.
 
 4. **Validate**: "Blocks" 항목이 없어질 때까지 고쳐서 다시 검증합니다.
