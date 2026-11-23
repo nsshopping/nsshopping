@@ -1,0 +1,33 @@
+{
+  "name": "nsmall-shopping",
+  "displayName": "NS홈쇼핑",
+  "version": "0.2.1",
+  "description": "NS홈쇼핑(m.nsmall.com) 방송 편성표, 방송 상품 검색, 상품 가격/혜택을 Claude에서 바로 조회합니다. 정보 조회 전용(주문/결제 없음).",
+  "author": {
+    "name": "엔에스쇼핑",
+    "email": "nsai@nsmall.com",
+    "url": "https://www.nsmall.com"
+  },
+  "homepage": "https://m.nsmall.com",
+  "license": "UNLICENSED",
+  "keywords": [
+    "NS홈쇼핑",
+    "nsmall",
+    "홈쇼핑",
+    "쇼핑",
+    "편성표",
+    "shopping"
+  ],
+  "icon": "./logo.png",
+  "documentationUrl": "https://m.nsmall.com",
+  "supportUrl": "https://m.nsmall.com/customer-center",
+  "privacyPolicyUrl": "https://m.nsmall.com/common/policy/privacy-policy",
+  "termsOfServiceUrl": "https://m.nsmall.com/common/terms/nsmall-terms",
+  "network": {
+    "hosts": [
+      "mapi.nsmall.com",
+      "m.nsmall.com",
+      "product-image.prod-nsmall.com"
+    ]
+  }
+}
