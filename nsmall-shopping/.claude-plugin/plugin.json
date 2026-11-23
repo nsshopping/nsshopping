@@ -1,10 +1,10 @@
 {
   "name": "nsmall-shopping",
   "displayName": "NS홈쇼핑",
-  "version": "0.2.2",
-  "description": "NS홈쇼핑(m.nsmall.com) 방송 편성표, 방송 상품 검색, 상품 가격/혜택을 Claude에서 바로 조회합니다. 정보 조회 전용(주문/결제 없음).",
+  "version": "0.2.3",
+  "description": "NS홈쇼핑에서 제공하는 상품을 손쉽게 볼 수 있습니다.",
   "author": {
-    "name": "엔에스쇼핑",
+    "name": "NS홈쇼핑",
     "email": "nsai@nsmall.com",
     "url": "https://www.nsmall.com"
   },
