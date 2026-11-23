@@ -56,7 +56,7 @@ python scripts/build-plugin-zip.py                                     # dist/ �
 
 ### 1) GitHub 저장소
 
-플러그인은 https://github.com/sinsu2/repo (`main` 브랜치)에 올라가 있습니다. 수정한 뒤에는 `version`을 올리고 commit, push만 하면 됩니다.
+플러그인은 https://github.com/nsshopping/repo (`main` 브랜치)에 올라가 있습니다. 수정한 뒤에는 `version`을 올리고 commit, push만 하면 됩니다.
 
 - 검증과 리뷰 중에는 비공개 저장소여도 되지만, **게시(Publish) 전에는 공개**로 바꿔야 합니다.
 - 비공개 저장소로 제출하려면 push 권한이 있는 GitHub 계정을 연결하고, 저장소에 Claude GitHub App을 설치해야 합니다.
@@ -70,7 +70,7 @@ python scripts/build-plugin-zip.py                                     # dist/ �
 
    | 항목 | 값 |
    |---|---|
-   | Repository | `https://github.com/sinsu2/repo` |
+   | Repository | `https://github.com/nsshopping/repo` |
    | Plugin path | `nsmall-shopping` |
    | Branch or tag | `main` (비워 두면 기본 브랜치) |
 
@@ -98,7 +98,7 @@ B의 1)처럼 GitHub에 push하면 끝입니다. `.claude-plugin/marketplace.jso
 사용자는 Claude Code에서 이렇게 설치합니다.
 
 ```text
-/plugin marketplace add sinsu2/repo
+/plugin marketplace add nsshopping/repo
 /plugin install nsmall-shopping@nsmall-plugins
 ```
 
