@@ -1,0 +1,45 @@
+# main에 push하면 directory 브랜치(공식 디렉터리 제출용)에 자동으로 합칩니다.
+# directory 브랜치에만 있는 plugin.json 필드(icon, 정책 URL 등)는 그대로 유지됩니다.
+name: Sync main -> directory
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-directory
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge main into directory
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git checkout directory
+          if ! git merge --no-edit origin/main; then
+            echo "::error::main을 directory에 자동으로 합치지 못했습니다(충돌). 로컬에서 직접 merge 해 주세요."
+            git merge --abort
+            exit 1
+          fi
+          git push origin directory
+
+      - name: Check directory plugin.json keeps listing fields
+        run: |
+          node -e '
+            const j = require("./nsmall-shopping/.claude-plugin/plugin.json");
+            const need = ["icon","supportUrl","privacyPolicyUrl","termsOfServiceUrl","documentationUrl"];
+            const miss = need.filter(k => !j[k]);
+            if (miss.length) { console.log("::error::directory 브랜치 plugin.json에 필드 없음: " + miss.join(", ")); process.exit(1); }
+            console.log("directory plugin.json OK, version " + j.version);
+          '
