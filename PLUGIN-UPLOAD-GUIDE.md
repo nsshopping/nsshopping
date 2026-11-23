@@ -26,7 +26,8 @@ python scripts/build-plugin-zip.py                                     # dist/ �
 
 - Claude 앱은 디렉터리 전용 필드를 모르는 키로 보고 "unrecognized keys in plugin.json" 경고를 띄웁니다. 그래서 `main`에서는 이 필드를 뺐습니다.
 - 디렉터리는 이 필드를 `plugin.json`에서 읽기 때문에, 제출할 때는 `directory` 브랜치를 지정합니다.
-- 수정은 `main`에서 하고, 디렉터리에 반영할 때 `directory` 브랜치로 합칩니다.
+- 수정은 `main`에서만 합니다. `main`에 push하면 GitHub Actions(`.github/workflows/sync-directory.yml`)가 자동으로 `directory`에 합칩니다.
+  - 결과는 GitHub 저장소의 **Actions** 탭에서 확인합니다. 충돌로 실패하면 로컬에서 직접 합칩니다.
   ```bash
   git checkout directory && git merge main && git push origin directory && git checkout main
   ```
