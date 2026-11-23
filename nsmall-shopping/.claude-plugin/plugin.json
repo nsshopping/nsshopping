@@ -18,6 +18,11 @@
     "편성표",
     "shopping"
   ],
+  "icon": "./logo.png",
+  "documentationUrl": "https://m.nsmall.com",
+  "supportUrl": "https://m.nsmall.com/customer-center",
+  "privacyPolicyUrl": "https://m.nsmall.com/common/policy/privacy-policy",
+  "termsOfServiceUrl": "https://m.nsmall.com/common/terms/nsmall-terms",
   "network": {
     "hosts": [
       "mapi.nsmall.com",
