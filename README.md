@@ -53,7 +53,7 @@ NS홈쇼핑(m.nsmall.com) 방송 편성표, 방송 상품 검색, 상품 가격�
 ### 설치
 
 ```text
-/plugin marketplace add nsshopping/repo
+/plugin marketplace add nsshopping/nsshopping
 /plugin install nsmall-shopping@nsmall-plugins
 ```
 
