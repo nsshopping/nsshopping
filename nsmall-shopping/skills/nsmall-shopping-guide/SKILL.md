@@ -1,6 +1,6 @@
 ---
-name: nsmall-shopping-guide
-description: NS홈쇼핑(nsmall, NS몰, m.nsmall.com) 상품 검색, 상품 추천, 가격, 방송 편성표, "지금 홈쇼핑 뭐 팔아?" 같은 질문에 답할 때 사용합니다. nsmall MCP 도구(get_broadcast_schedule, search_products, get_product_detail) 사용법, m.nsmall.com URL 규칙, 공식 출처만 인용하는 규칙을 담고 있습니다.
+name: "nsmall-shopping-guide"
+description: "NS홈쇼핑(nsmall, NS몰, m.nsmall.com) 상품 검색, 상품 추천, 가격, 방송 편성표, \"지금 홈쇼핑 뭐 팔아?\" 같은 질문에 답할 때 사용합니다. nsmall MCP 도구(get_broadcast_schedule, search_products, get_product_detail) 사용법, m.nsmall.com URL 규칙, 공식 출처만 인용하는 규칙을 담고 있습니다."
 ---
 
 # NS홈쇼핑 쇼핑 도우미

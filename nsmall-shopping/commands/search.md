@@ -1,5 +1,5 @@
 ---
-description: NS홈쇼핑 상품을 찾습니다 (예: /nsmall-shopping:search 20만원 이하 청소기)
+description: "NS홈쇼핑 상품을 찾습니다 (예: /nsmall-shopping:search 20만원 이하 청소기)"
 argument-hint: "<검색어> [가격 조건]"
 ---
 

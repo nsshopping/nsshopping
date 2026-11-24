@@ -1,0 +1,23 @@
+# NS홈쇼핑 Claude 원격 MCP 서버 (systemd)
+#   sudo mkdir -p /opt/nsmall-claude-mcp && sudo cp ../nsmall-shopping/server/index.mjs /opt/nsmall-claude-mcp/
+#   sudo cp nsmall-claude-mcp.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now nsmall-claude-mcp
+#   상태: systemctl status nsmall-claude-mcp / 로그: journalctl -u nsmall-claude-mcp -f
+[Unit]
+Description=NS Homeshopping Claude MCP Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/nsmall-claude-mcp
+Environment=PORT=3100
+Environment=HOST=127.0.0.1
+Environment=MCP_PATH=/claude/mcp
+ExecStart=/usr/bin/node /opt/nsmall-claude-mcp/index.mjs --http
+Restart=always
+RestartSec=3
+User=nobody
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

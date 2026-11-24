@@ -1,6 +1,10 @@
-# main에 push하면 directory 브랜치(공식 디렉터리 제출용)에 자동으로 합칩니다.
-# directory 브랜치에만 있는 plugin.json 필드(icon, 정책 URL 등)는 그대로 유지됩니다.
-name: Sync main -> directory
+# main에 push하면 directory 브랜치(공식 디렉터리 제출본)를 main 기준으로 다시 만듭니다.
+#   - 로컬 MCP 서버(server/) 제거, .mcp.json → 원격 HTTP 서버
+#   - plugin.json: network 제거, 목록용 필드(icon, 정책 URL) 추가
+#   - README: 로컬 전용 안내 제거
+# 설정: .github/directory/listing.json
+# 원격 MCP 주소는 저장소 변수 NSMALL_MCP_URL로 바꿀 수 있습니다 (Settings > Secrets and variables > Actions > Variables).
+name: Build directory branch
 
 on:
   push:
@@ -11,35 +15,57 @@ permissions:
   contents: write
 
 concurrency:
-  group: sync-directory
+  group: build-directory
   cancel-in-progress: false
 
 jobs:
-  sync:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Merge main into directory
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate directory branch from main
+        env:
+          MCP_URL: ${{ vars.NSMALL_MCP_URL }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git checkout directory
-          if ! git merge --no-edit origin/main; then
-            echo "::error::main을 directory에 자동으로 합치지 못했습니다(충돌). 로컬에서 직접 merge 해 주세요."
-            git merge --abort
-            exit 1
+          SRC="$PWD"
+          if git show-ref --verify --quiet refs/remotes/origin/directory; then
+            git worktree add -B directory ../dir origin/directory
+          else
+            git worktree add -b directory ../dir
           fi
+          rsync -a --delete --exclude .git "$SRC"/ ../dir/
+          node .github/directory/build-directory.mjs ../dir/nsmall-shopping "${MCP_URL:-}"
+          cd ../dir
+          git add -A
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+            exit 0
+          fi
+          git commit -m "directory: main ${GITHUB_SHA::7} 기준 제출본 생성"
           git push origin directory
 
-      - name: Check directory plugin.json keeps listing fields
+      - name: Verify directory submission rules
         run: |
+          cd ../dir/nsmall-shopping
           node -e '
-            const j = require("./nsmall-shopping/.claude-plugin/plugin.json");
-            const need = ["icon","supportUrl","privacyPolicyUrl","termsOfServiceUrl","documentationUrl"];
-            const miss = need.filter(k => !j[k]);
-            if (miss.length) { console.log("::error::directory 브랜치 plugin.json에 필드 없음: " + miss.join(", ")); process.exit(1); }
-            console.log("directory plugin.json OK, version " + j.version);
+            const fs = require("fs");
+            const j = JSON.parse(fs.readFileSync(".claude-plugin/plugin.json", "utf8"));
+            const m = JSON.parse(fs.readFileSync(".mcp.json", "utf8"));
+            const errors = [];
+            if (fs.existsSync("server")) errors.push("server/ 폴더가 남아 있음");
+            if (j.network) errors.push("plugin.json에 network 필드가 남아 있음");
+            for (const k of ["icon","supportUrl","privacyPolicyUrl","termsOfServiceUrl","documentationUrl"]) if (!j[k]) errors.push("plugin.json에 " + k + " 없음");
+            for (const [n, s] of Object.entries(m.mcpServers)) if (s.command || !/^https:\/\//.test(s.url || "")) errors.push("MCP 서버 " + n + "가 원격 https 서버가 아님");
+            if (errors.length) { errors.forEach(e => console.log("::error::" + e)); process.exit(1); }
+            console.log("directory 제출본 OK: version " + j.version + ", MCP " + Object.values(m.mcpServers).map(s => s.url).join(", "));
           '

@@ -1,144 +1,111 @@
 # NS홈쇼핑 Claude 플러그인: 업로드 가이드
 
-Claude에 플러그인을 올리는 방법은 세 가지입니다. 목적에 맞는 방법을 고르세요.
+저장소: https://github.com/nsshopping/nsshopping
 
 | 방법 | 대상 | 올리는 것 | 리뷰 |
 |---|---|---|---|
-| A. ZIP 업로드 | 나 또는 우리 조직 (claude.ai, 데스크톱 앱) | `dist/nsmall-shopping-<버전>.zip` | 없음 |
-| B. 공식 디렉터리 제출 | 모든 Claude 사용자 (공개 목록) | **GitHub 저장소** (ZIP 아님) | 자동 검사 + 사람 리뷰 |
-| C. GitHub 마켓플레이스 | 링크를 아는 Claude Code 사용자 | GitHub 저장소 push | 없음 |
+| A. GitHub 마켓플레이스 | Claude 앱, Claude Code 사용자 | `main` 브랜치 (push하면 끝) | 없음 |
+| B. 공식 디렉터리 제출 | 모든 Claude 사용자 (공개 목록) | `directory` 브랜치 | 자동 검사 + 사람 리뷰 |
+| C. ZIP 업로드 | 나 또는 우리 조직 | `dist/nsmall-shopping-<버전>.zip` | 없음 |
 
-## 업로드 전 공통 준비
+## 브랜치 구성
+
+수정은 **`main`에서만** 합니다. `main`에 push하면 GitHub Actions(`.github/workflows/sync-directory.yml`)가 `directory` 브랜치를 자동으로 다시 만듭니다. 결과는 GitHub 저장소의 **Actions** 탭에서 확인합니다.
+
+| | `main` (마켓플레이스, ZIP) | `directory` (디렉터리 제출본, 자동 생성) |
+|---|---|---|
+| MCP 서버 | 로컬: 사용자 PC에서 `server/index.mjs` 실행 | **원격**: `https://image.nsmall.com/claude/mcp` |
+| `server/` 폴더 | 있음 | 없음 |
+| `plugin.json`의 `network` | 없음 | 없음 |
+| 목록용 필드 (`icon`, 정책 URL 4개) | 없음 (Claude 앱이 모르는 키로 경고하기 때문) | 있음 |
+| README | 로컬 설치 안내 | 원격 서버 안내 |
+
+디렉터리 제출본 설정은 `.github/directory/listing.json`에 있습니다(원격 주소, 목록용 필드).
+로컬에서 미리 만들어 보려면:
 
 ```bash
-claude plugin validate ./nsmall-shopping --profile directory --strict   # 제출 기준 검증
-python scripts/build-plugin-zip.py                                     # dist/ 에 ZIP 생성
+cp -r nsmall-shopping /tmp/dir-preview
+node .github/directory/build-directory.mjs /tmp/dir-preview
+claude plugin validate /tmp/dir-preview --profile directory --strict
 ```
 
 새 버전을 올릴 때마다 `nsmall-shopping/.claude-plugin/plugin.json`과 `.claude-plugin/marketplace.json`의 `version`을 같이 올립니다.
 
-### 브랜치 구성 (중요)
+---
 
-| 브랜치 | 용도 | `plugin.json` |
-|---|---|---|
-| `main` | 마켓플레이스 동기화(Claude 앱, Claude Code), ZIP 업로드 | 디렉터리 전용 필드 **없음** |
-| `directory` | 공식 디렉터리 제출 | `main` + 디렉터리 전용 필드 5개 (`icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, `termsOfServiceUrl`) |
+## A. GitHub 마켓플레이스
 
-- Claude 앱은 디렉터리 전용 필드를 모르는 키로 보고 "unrecognized keys in plugin.json" 경고를 띄웁니다. 그래서 `main`에서는 이 필드를 뺐습니다.
-- 디렉터리는 이 필드를 `plugin.json`에서 읽기 때문에, 제출할 때는 `directory` 브랜치를 지정합니다.
-- 수정은 `main`에서만 합니다. `main`에 push하면 GitHub Actions(`.github/workflows/sync-directory.yml`)가 자동으로 `directory`에 합칩니다.
-  - 결과는 GitHub 저장소의 **Actions** 탭에서 확인합니다. 충돌로 실패하면 로컬에서 직접 합칩니다.
-  ```bash
-  git checkout directory && git merge main && git push origin directory && git checkout main
+- Claude 앱: **마켓플레이스 추가**에 `nsshopping/nsshopping`을 입력합니다.
+- Claude Code:
+  ```text
+  /plugin marketplace add nsshopping/nsshopping
+  /plugin install nsmall-shopping@nsmall-plugins
   ```
-
-`directory` 브랜치의 디렉터리 전용 필드 값:
-
-| 항목 | 값 |
-|---|---|
-| `displayName` | `NS홈쇼핑` (`main`에도 있음) |
-| `author.name` / `author.email` | `엔에스쇼핑` / `nsai@nsmall.com` (`main`에도 있음) |
-| `icon` | `./logo.png` (플러그인 폴더 맨 위의 NS 로고, 512×512 PNG) |
-| `supportUrl` | `https://m.nsmall.com/customer-center` |
-| `privacyPolicyUrl` | `https://m.nsmall.com/common/policy/privacy-policy` |
-| `termsOfServiceUrl` | `https://m.nsmall.com/common/terms/nsmall-terms` |
-| `documentationUrl` | `https://m.nsmall.com` |
-
-> **아이콘 표시에 대해:** 공식 문서상 `icon`은 디렉터리 목록에서만 쓰입니다. Claude 앱과 Claude Code의 플러그인 화면에서 아이콘을 지정하는 방법은 문서에 없어서, 앱에서는 로고가 보이지 않습니다. 디렉터리에 게시되면 로고가 표시됩니다.
-
----|---|
-| `displayName` | `NS홈쇼핑` (화면에 보이는 이름. `name`은 `nsmall-shopping` 그대로 유지) |
-| `author.name` / `author.email` | `엔에스쇼핑` / `nsai@nsmall.com` |
-| `supportUrl` | `https://m.nsmall.com/customer-center` |
-| `privacyPolicyUrl` | `https://m.nsmall.com/common/policy/privacy-policy` |
-| `termsOfServiceUrl` | `https://m.nsmall.com/common/terms/nsmall-terms` |
-| `icon` | `./logo.png` (플러그인 루트의 NS 로고, 512×512 PNG) |
+- 마켓플레이스로 설치한 플러그인 화면에는 로고, 제작자, 상세설명이 나오지 않습니다(출처와 한 줄 소개만 표시). 이 항목은 디렉터리(B)에 게시돼야 보입니다.
+- `main`의 MCP 서버는 사용자 PC에서 실행되므로 Claude Code와 데스크톱 앱의 로컬 세션에서 동작합니다. claude.ai 웹 채팅에서는 스킬만 동작합니다.
 
 ---
 
-## A. ZIP 업로드 (claude.ai / Claude 데스크톱 앱)
+## B. 공식 디렉터리 제출
 
-1. `python scripts/build-plugin-zip.py`를 실행합니다. ZIP 루트에 `.claude-plugin/plugin.json`이 오도록 압축됩니다.
-2. Claude에서 **사용자 지정(Customize) → 플러그인(Plugins) → 추가(Add) → 플러그인 업로드(Upload plugin)**를 선택하고 ZIP을 올립니다.
-   - 조직 전체에 배포하려면 Owner가 **조직 설정(Organization settings) → 플러그인 및 스킬(Plugins & skills)**에서 올립니다.
-   - 한도: 파일당 200MB, 플러그인당 5,000개 파일. 최상위 `bin/` 폴더는 거부됩니다.
-3. Claude Code에서 먼저 확인하려면: `claude --plugin-dir dist/nsmall-shopping-0.2.2.zip`
+### 사전 조건
 
-> **이름과 이미지 표시에 대해**
-> - 이름은 `plugin.json`의 `displayName`(`NS홈쇼핑`)으로 표시됩니다. 예전 ZIP(0.2.0)에는 이 필드가 없어 `nsmall-shopping`으로 보였습니다.
-> - 이미지 필드 `icon`은 공식 문서상 **디렉터리 목록(B) 전용**이고, Claude 앱은 이 필드를 읽지 않습니다. 그래서 `main`과 ZIP에서는 빼 두었고, 앱에서는 로고가 보이지 않습니다. 디렉터리에 게시되면 로고가 표시됩니다.
-> - 이미 올린 이전 버전이 있으면 삭제하고 새 ZIP을 올리세요.
+1. **원격 MCP 서버 배포**: `https://image.nsmall.com/claude/mcp`가 실제로 응답해야 합니다. 배포 방법은 [deploy/README.md](deploy/README.md)를 보세요. 현재 이 주소는 CDN에서 405로 막혀 있습니다.
+2. **회사 claude.ai 계정**: 유료 플랜(Team, Enterprise)의 **Owner**가 제출합니다.
 
-> **주의: 로컬 MCP 서버는 claude.ai 웹 채팅에서 실행되지 않습니다.**
-> 웹 채팅에서는 스킬만 동작하고, 스킬에 적힌 대로 웹 검색과 페치로 편성표 API(`mapi.nsmall.com`)를 직접 읽어 답합니다.
-> MCP 툴(`get_broadcast_schedule` 등)은 **Claude Code**와 **내 컴퓨터에서 실행하는 Cowork 세션**에서 동작합니다.
-> 웹과 모바일에서도 툴을 쓰려면 ChatGPT 버전처럼 원격 HTTPS MCP 서버를 배포해야 합니다. (`D:\챗gpt`의 서버를 재사용하면 됩니다. 아래 "참고" 참조)
+### 제출 순서
 
----
-
-## B. Claude 공식 디렉터리 제출
-
-디렉터리는 **ZIP을 받지 않고 GitHub 저장소를 받습니다.**
-
-### 1) GitHub 저장소
-
-플러그인은 https://github.com/nsshopping/nsshopping (`main` 브랜치)에 올라가 있습니다. 수정한 뒤에는 `version`을 올리고 commit, push만 하면 됩니다.
-
-- 검증과 리뷰 중에는 비공개 저장소여도 되지만, **게시(Publish) 전에는 공개**로 바꿔야 합니다.
-- 비공개 저장소로 제출하려면 push 권한이 있는 GitHub 계정을 연결하고, 저장소에 Claude GitHub App을 설치해야 합니다.
-
-### 2) 제출
-
-1. https://claude.ai/directory/manage 에 접속합니다.
-   - 유료 플랜(Pro, Max, Team, Enterprise)이 필요합니다. Team, Enterprise는 **Owner**가 제출합니다(Enterprise는 "Directory" 권한을 받은 사용자도 제출 가능).
-2. **Submit new → Plugin bundle**을 선택합니다.
-3. **Source** 단계에서 다음을 입력합니다.
+1. https://claude.ai/directory/manage → **Submit new** → **Plugin bundle**
+2. **Source**
 
    | 항목 | 값 |
    |---|---|
    | Repository | `https://github.com/nsshopping/nsshopping` |
    | Plugin path | `nsmall-shopping` |
-   | Branch or tag | `directory` (아이콘과 정책 URL이 들어 있는 제출용 브랜치) |
+   | Branch or tag | **`directory`** |
 
-   표시 이름(`NS홈쇼핑`), 로고(`./logo.png`), 설명, 정책 URL은 `directory` 브랜치의 `plugin.json`과 `README.md`에서 자동으로 읽힙니다.
-   Validate에서 `displayName` 문자 체계 경고("한 가지 문자 체계로 작성")가 나오면 `NS홈쇼핑`(영문+한글 혼합) 때문이므로, 한글만 쓰는 `엔에스홈쇼핑`으로 바꿉니다.
+3. **Validate**: 차단(Blocking) 항목이 없어야 다음 단계로 갑니다.
+4. **Listing details**: `directory` 브랜치의 `plugin.json`과 `README.md`에서 자동으로 채워집니다.
 
-4. **Validate**: "Blocks" 항목이 없어질 때까지 고쳐서 다시 검증합니다.
-5. **Listing details**: `plugin.json`과 `README.md`에서 자동으로 채워집니다. 확인만 합니다.
-6. **Data handling** 질문에 답합니다. 이 플러그인 기준 답변 예시:
-   - 개인정보 수집: **없음**. 공개 편성표 API만 조회하고, 사용자 정보를 저장하거나 외부로 보내지 않습니다.
-   - 외부 전송 대상: `mapi.nsmall.com`(편성표 API). 사용자가 입력한 날짜와 채널만 요청 경로에 들어갑니다.
-   - 데이터 보관: 서버 프로세스 메모리에 1분 캐시만 두고, 파일이나 DB에 저장하지 않습니다.
-7. **Compliance**: 담당자 연락 이메일을 입력하고 확인 항목 4개에 동의합니다.
-8. **Review and submit**: 업데이트 방식(GitHub push webhook 또는 Scheduled check only)과 자동 게시 여부를 고르고 제출합니다.
-9. 자동 검사와 보안 스캔을 통과하면 사람이 리뷰합니다. 승인 후 게시됩니다.
+   | 목록 항목 | 값 |
+   |---|---|
+   | 이름 | NS홈쇼핑 (`displayName`) |
+   | 로고 | NS 로고 (`icon: ./logo.png`) |
+   | 제작 | NS Shopping (`author.name`) |
+   | 한 줄 소개 | NS홈쇼핑에서 제공하는 상품을 손쉽게 볼 수 있습니다. |
+   | 상세설명 | README 맨 앞 문구 |
+
+5. **Data handling**
+
+   | 질문 | 답변 |
+   |---|---|
+   | 개인정보 수집 | 없음. 로그인과 사용자 정보가 없고 공개 편성표 데이터만 조회합니다. |
+   | 다른 곳으로 전송 | 원격 MCP 서버(`image.nsmall.com`, NS홈쇼핑 운영)가 `mapi.nsmall.com`(NS홈쇼핑 편성표 API)을 호출합니다. 요청에는 날짜, 채널, 검색어만 들어갑니다. |
+   | 보관 | 저장하지 않습니다. 서버 메모리에 조회 결과를 1분간 캐시만 합니다. |
+   | 미성년자 사용 | 미성년자 대상 서비스가 아닙니다. |
+
+6. **Compliance**: 연락 메일 `nsai@nsmall.com`, 확인 항목 4개 동의
+7. **Review and submit**: 업데이트 방식은 **GitHub push webhook**, 자동 게시는 처음에는 끄기
+
+### 이름 관련 "거부 예정" 항목 (이의제기)
+
+조직이 Verified가 아니면 `NS홈쇼핑` 같은 브랜드 이름을 쓸 때 "기존 목록과 이름이 헷갈릴 수 있음", "게시자 이름이 다른 이름과 헷갈릴 수 있음"이 나옵니다. 실제 회사 브랜드이므로 이름은 유지하고 **이의제기**합니다.
+
+- 제출 화면에서 이의제기(appeal)를 선택하고 회사 소유 증빙을 냅니다.
+  - 공식 도메인 `nsmall.com` 소유 (연락 메일 `nsai@nsmall.com`이 같은 도메인)
+  - GitHub 조직 `nsshopping` 소유
+  - 공식 사이트 https://www.nsmall.com , https://m.nsmall.com
+- 게시자 이름은 GitHub 조직과 맞춰 `NS Shopping`으로 설정했습니다.
+- 조직 인증(Verified)을 받으면 이 항목과 로컬 MCP 서버 제한이 함께 풀립니다.
 
 제출 한도: 조직당 24시간에 10건, 저장소 폴더 하나당 제출 1건.
 
 ---
 
-## C. GitHub 마켓플레이스 (리뷰 없이 바로 배포)
+## C. ZIP 업로드 (claude.ai / Claude 데스크톱 앱)
 
-B의 1)처럼 GitHub에 push하면 끝입니다. `.claude-plugin/marketplace.json`이 이미 들어 있습니다.
-
-사용자는 Claude Code에서 이렇게 설치합니다.
-
-```text
-/plugin marketplace add nsshopping/nsshopping
-/plugin install nsmall-shopping@nsmall-plugins
+```bash
+python scripts/build-plugin-zip.py      # dist/nsmall-shopping-<버전>.zip
 ```
 
-업데이트는 `version`을 올려 push한 뒤, 사용자가 `claude plugin update nsmall-shopping@nsmall-plugins`를 실행하면 됩니다.
-비공개 저장소도 되므로 사내 배포에 적합합니다.
-
----
-
-## 참고: 웹과 모바일에서도 툴을 쓰려면
-
-claude.ai 웹 채팅과 모바일에서는 원격 MCP 서버만 연결됩니다. `D:\챗gpt`의 MCP 서버(`/mcp`, Streamable HTTP)를 공개 HTTPS로 배포한 뒤 아래 중 하나를 고릅니다.
-
-- 이 플러그인의 `nsmall-shopping/.mcp.json`을 원격 서버로 바꿉니다.
-  ```json
-  { "mcpServers": { "nsmall": { "type": "http", "url": "https://<배포 도메인>/mcp" } } }
-  ```
-- 또는 https://claude.ai/directory/manage 에서 **MCP connector**로 서버 URL을 따로 제출합니다.
+Claude에서 **사용자 지정 → 플러그인 → 추가 → 플러그인 업로드**로 올립니다. 조직 전체에 배포하려면 Owner가 **조직 설정 → 플러그인 및 스킬**에서 올립니다. ZIP은 `main` 기준(로컬 MCP 서버)입니다.
