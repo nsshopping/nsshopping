@@ -90,6 +90,7 @@ directory:end -->
 
 ### 개발자 안내
 
+- 기능, 접근 주소, MCP 데이터 전달 규격: [docs/MCP-SERVER-GUIDE.md](docs/MCP-SERVER-GUIDE.md)
 - 서버 원격 배포: [deploy/README.md](deploy/README.md)
 - 업로드와 디렉터리 제출: [PLUGIN-UPLOAD-GUIDE.md](PLUGIN-UPLOAD-GUIDE.md)
 - ZIP 만들기: `python scripts/build-plugin-zip.py`
