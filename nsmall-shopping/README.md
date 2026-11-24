@@ -41,7 +41,7 @@ NS홈쇼핑(m.nsmall.com) 방송 편성표, 방송 상품 검색, 상품 가격�
 
 | 구성 요소 | 이름 | 설명 |
 |---|---|---|
-| MCP 서버 (원격) | `nsmall` | NS홈쇼핑이 운영하는 원격 서버(`https://image.nsmall.com/claude/mcp`)에 연결합니다. 설치할 것이 없습니다 |
+| MCP 서버 (원격) | `nsmall` | NS홈쇼핑이 운영하는 원격 서버(`https://ai-mcp.nsmall.com/mcp`)에 연결합니다. 설치할 것이 없습니다 |
 | 툴 | `get_broadcast_schedule` | TV / TV Shop+ 편성표와 방송 상품 (날짜, 채널, 방송중, 시간대 필터) |
 | 툴 | `search_products` | 어제~모레 방송 상품에서 키워드, 가격대로 검색 + m.nsmall.com 검색 링크 |
 | 툴 | `get_product_detail` | 상품코드로 판매가, 할인, 혜택, 방송 일정, 상세 링크 조회 |

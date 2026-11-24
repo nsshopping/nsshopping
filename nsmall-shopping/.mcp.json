@@ -2,7 +2,7 @@
   "mcpServers": {
     "nsmall": {
       "type": "http",
-      "url": "https://image.nsmall.com/claude/mcp"
+      "url": "https://ai-mcp.nsmall.com/mcp"
     }
   }
 }

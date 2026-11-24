@@ -14,7 +14,7 @@
 
 | | `main` (마켓플레이스, ZIP) | `directory` (디렉터리 제출본, 자동 생성) |
 |---|---|---|
-| MCP 서버 | 로컬: 사용자 PC에서 `server/index.mjs` 실행 | **원격**: `https://image.nsmall.com/claude/mcp` |
+| MCP 서버 | 로컬: 사용자 PC에서 `server/index.mjs` 실행 | **원격**: `https://ai-mcp.nsmall.com/mcp` |
 | `server/` 폴더 | 있음 | 없음 |
 | `plugin.json`의 `network` | 없음 | 없음 |
 | 목록용 필드 (`icon`, 정책 URL 4개) | 없음 (Claude 앱이 모르는 키로 경고하기 때문) | 있음 |
@@ -50,7 +50,7 @@ claude plugin validate /tmp/dir-preview --profile directory --strict
 
 ### 사전 조건
 
-1. **원격 MCP 서버 배포**: `https://image.nsmall.com/claude/mcp`가 실제로 응답해야 합니다. 배포 방법은 [deploy/README.md](deploy/README.md)를 보세요. 현재 이 주소는 CDN에서 405로 막혀 있습니다.
+1. **원격 MCP 서버 배포**: `https://ai-mcp.nsmall.com/mcp`가 실제로 응답해야 합니다. 배포 방법은 [deploy/README.md](deploy/README.md)를 보세요. 현재 `ai-mcp.nsmall.com`은 DNS에 등록되어 있지 않습니다.
 2. **회사 claude.ai 계정**: 유료 플랜(Team, Enterprise)의 **Owner**가 제출합니다.
 
 ### 제출 순서
@@ -80,7 +80,7 @@ claude plugin validate /tmp/dir-preview --profile directory --strict
    | 질문 | 답변 |
    |---|---|
    | 개인정보 수집 | 없음. 로그인과 사용자 정보가 없고 공개 편성표 데이터만 조회합니다. |
-   | 다른 곳으로 전송 | 원격 MCP 서버(`image.nsmall.com`, NS홈쇼핑 운영)가 `mapi.nsmall.com`(NS홈쇼핑 편성표 API)을 호출합니다. 요청에는 날짜, 채널, 검색어만 들어갑니다. |
+   | 다른 곳으로 전송 | 원격 MCP 서버(`ai-mcp.nsmall.com`, NS홈쇼핑 운영)가 `mapi.nsmall.com`(NS홈쇼핑 편성표 API)을 호출합니다. 요청에는 날짜, 채널, 검색어만 들어갑니다. |
    | 보관 | 저장하지 않습니다. 서버 메모리에 조회 결과를 1분간 캐시만 합니다. |
    | 미성년자 사용 | 미성년자 대상 서비스가 아닙니다. |
 
