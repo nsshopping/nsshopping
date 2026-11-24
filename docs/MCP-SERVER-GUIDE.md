@@ -22,11 +22,11 @@ Claude 앱의 플러그인 메뉴에 보이는 4개 항목입니다.
 
 스킬은 "어떻게 답할지"를 정하고, 실제 데이터는 MCP 서버의 툴이 가져옵니다.
 
-| 툴 | 하는 일 | 데이터 출처 |
-|---|---|---|
-| `get_broadcast_schedule` | TV / TV Shop+ 편성표와 방송 상품(상품명, 판매가, 할인, 혜택, 상품코드, 링크) | 편성표 API (해당 날짜) |
-| `search_products` | 어제~모레 방송 상품에서 키워드, 가격대로 검색 + m.nsmall.com 검색 링크 | 편성표 API (4일치) |
-| `get_product_detail` | 상품코드로 판매가, 정상가/할인율, 혜택, 방송 일정, 이미지, 상세 링크 | 편성표 API (4일치) |
+| 툴 (`name`) | 한글 명칭 (`title`) | 하는 일 | 데이터 출처 |
+|---|---|---|---|
+| `get_broadcast_schedule` | 방송 편성표 조회 | TV / TV Shop+ 편성표와 방송 상품(상품명, 판매가, 할인, 혜택, 상품코드, 링크) | 편성표 API (해당 날짜) |
+| `search_products` | 상품 검색 | 어제~모레 방송 상품에서 키워드, 가격대로 검색 + m.nsmall.com 검색 링크 | 편성표 API (4일치) |
+| `get_product_detail` | 상품 상세 조회 | 상품코드로 판매가, 정상가/할인율, 혜택, 방송 일정, 이미지, 상세 링크 | 편성표 API (4일치) |
 
 > 모든 툴은 **읽기 전용**입니다. 로그인, 주문, 결제, 배송 조회는 하지 않고 개인정보를 받지 않습니다.
 > 툴이 메뉴에 안 보이고 스킬만 보이면 MCP 서버에 연결되지 않은 상태입니다(예: claude.ai 웹에서 로컬 서버판 사용, 원격 서버 미배포).
@@ -116,7 +116,7 @@ curl -X POST https://ai-mcp.nsmall.com/mcp \
 {"jsonrpc":"2.0","id":1,"result":{
   "protocolVersion":"2025-06-18",
   "capabilities":{"tools":{"listChanged":false}},
-  "serverInfo":{"name":"nsmall","title":"NS홈쇼핑","version":"0.3.0"},
+  "serverInfo":{"name":"nsmall","title":"NS홈쇼핑","version":"0.3.1"},
   "instructions":"NS홈쇼핑(m.nsmall.com) 방송 편성표와 방송 상품 정보를 조회합니다. 정보 조회 전용이며 주문/결제는 하지 않습니다."}}
 ```
 
@@ -128,7 +128,7 @@ curl -X POST https://ai-mcp.nsmall.com/mcp \
 curl ... -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
 ```
 
-응답 `result.tools[]`의 각 항목: `name`, `title`, `description`, `inputSchema`(JSON Schema), `annotations`(`readOnlyHint: true` 등). 툴별 입력은 3-3을 보세요.
+응답 `result.tools[]`의 각 항목: `name`(영문, 변경 금지), `title`(한글 표시 이름), `description`, `inputSchema`(JSON Schema), `annotations`(`readOnlyHint: true` 등). 툴별 입력은 3-3을 보세요.
 
 #### tools/call
 
@@ -156,7 +156,7 @@ curl ... -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get
 
 ### 3-3. 툴별 입력과 출력
 
-#### ① `get_broadcast_schedule`
+#### ① `get_broadcast_schedule` (방송 편성표 조회)
 
 | 입력 | 타입 | 설명 |
 |---|---|---|
@@ -176,7 +176,7 @@ curl ... -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get
 ※ 가격과 혜택은 수시로 바뀝니다. 최종 정보는 m.nsmall.com에서 확인하도록 안내하세요.
 ```
 
-#### ② `search_products`
+#### ② `search_products` (상품 검색)
 
 | 입력 | 타입 | 설명 |
 |---|---|---|
@@ -197,7 +197,7 @@ curl ... -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get
 ```
 0건이면 검색 결과 링크와 "`site:m.nsmall.com/goods 키워드`로만 웹 검색" 안내를 돌려줍니다.
 
-#### ③ `get_product_detail`
+#### ③ `get_product_detail` (상품 상세 조회)
 
 | 입력 | 타입 | 설명 |
 |---|---|---|

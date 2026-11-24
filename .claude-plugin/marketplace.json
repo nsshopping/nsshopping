@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "NS홈쇼핑 Claude Code 플러그인 마켓플레이스",
-    "version": "0.3.0"
+    "version": "0.3.1"
   },
   "plugins": [
     {
@@ -14,7 +14,7 @@
       "displayName": "NS홈쇼핑",
       "source": "./nsmall-shopping",
       "description": "NS홈쇼핑에서 제공하는 상품을 손쉽게 볼 수 있습니다.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "category": "shopping",
       "keywords": [
         "NS홈쇼핑",

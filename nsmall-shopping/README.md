@@ -42,9 +42,9 @@ NS홈쇼핑(m.nsmall.com) 방송 편성표, 방송 상품 검색, 상품 가격�
 | 구성 요소 | 이름 | 설명 |
 |---|---|---|
 | MCP 서버 (원격) | `nsmall` | NS홈쇼핑이 운영하는 원격 서버(`https://ai-mcp.nsmall.com/mcp`)에 연결합니다. 설치할 것이 없습니다 |
-| 툴 | `get_broadcast_schedule` | TV / TV Shop+ 편성표와 방송 상품 (날짜, 채널, 방송중, 시간대 필터) |
-| 툴 | `search_products` | 어제~모레 방송 상품에서 키워드, 가격대로 검색 + m.nsmall.com 검색 링크 |
-| 툴 | `get_product_detail` | 상품코드로 판매가, 할인, 혜택, 방송 일정, 상세 링크 조회 |
+| 툴 | `get_broadcast_schedule` (방송 편성표 조회) | TV / TV Shop+ 편성표와 방송 상품 (날짜, 채널, 방송중, 시간대 필터) |
+| 툴 | `search_products` (상품 검색) | 어제~모레 방송 상품에서 키워드, 가격대로 검색 + m.nsmall.com 검색 링크 |
+| 툴 | `get_product_detail` (상품 상세 조회) | 상품코드로 판매가, 할인, 혜택, 방송 일정, 상세 링크 조회 |
 | 스킬 | `get-started` | 처음 쓰는 사용자에게 기능 소개 |
 | 스킬 | `nsmall-shopping-guide` | 툴 사용 규칙, URL 규칙, 공식 출처만 인용하는 규칙 |
 | 커맨드 | `/nsmall-shopping:schedule` | 예: `/nsmall-shopping:schedule 내일 저녁` |
