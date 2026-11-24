@@ -150,7 +150,7 @@ const readOnly = { readOnlyHint: true, destructiveHint: false, idempotentHint: t
 const TOOLS = [
   {
     name: "get_broadcast_schedule",
-    title: "NS홈쇼핑 방송 편성표",
+    title: "방송 편성표 조회",
     description:
       "NS홈쇼핑 TV / TV Shop+ 방송 편성표와 방송 상품(상품명, 판매가, 할인, 혜택, 상품코드, 링크)을 조회합니다. " +
       "'오늘 NS홈쇼핑 뭐 팔아?', '지금 방송 중인 상품', '내일 저녁 편성' 같은 질문에 사용하세요. N라이브(LIVE)는 데이터가 없어 링크만 제공합니다.",
@@ -165,7 +165,7 @@ const TOOLS = [
       },
       additionalProperties: false,
     },
-    annotations: readOnly,
+    annotations: { ...readOnly, title: "방송 편성표 조회" },
     handler: async ({ date, channel, status = "all", fromHour, toHour }) => {
       const d = date ?? kstDate();
       if (channel === "LIVE") {
@@ -202,7 +202,7 @@ const TOOLS = [
   },
   {
     name: "search_products",
-    title: "NS홈쇼핑 상품 검색",
+    title: "상품 검색",
     description:
       "NS홈쇼핑 상품을 키워드로 찾습니다. 어제~모레 방송 편성 상품 중 키워드와 가격 조건에 맞는 상품(실제 판매가, 상품코드, 링크)과 " +
       "m.nsmall.com 검색 결과 링크를 돌려줍니다. 방송 상품이 아닌 일반 상품은 검색 링크로 안내하세요.",
@@ -218,7 +218,7 @@ const TOOLS = [
       required: ["query"],
       additionalProperties: false,
     },
-    annotations: readOnly,
+    annotations: { ...readOnly, title: "상품 검색" },
     handler: async ({ query, minPrice, maxPrice, sort = "relevance", limit = 10 }) => {
       const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
       const all = await recentBroadcastProducts();
@@ -265,7 +265,7 @@ const TOOLS = [
   },
   {
     name: "get_product_detail",
-    title: "NS홈쇼핑 상품 상세",
+    title: "상품 상세 조회",
     description:
       "NS홈쇼핑 상품코드로 판매가, 정상가/할인율, 혜택, 방송 일정, 상세 링크를 조회합니다. " +
       "search_products 또는 get_broadcast_schedule 결과의 상품코드를 사용하세요. 상품코드를 지어내지 마세요.",
@@ -275,7 +275,7 @@ const TOOLS = [
       required: ["productId"],
       additionalProperties: false,
     },
-    annotations: readOnly,
+    annotations: { ...readOnly, title: "상품 상세 조회" },
     handler: async ({ productId }) => {
       const p = (await recentBroadcastProducts()).find((x) => x.id === String(productId));
       if (!p) {
@@ -302,7 +302,7 @@ const TOOLS = [
 ];
 
 // ---------------------------------------------------------------- MCP / JSON-RPC
-const SERVER_INFO = { name: "nsmall", title: "NS홈쇼핑", version: "0.3.0" };
+const SERVER_INFO = { name: "nsmall", title: "NS홈쇼핑", version: "0.3.1" };
 const SUPPORTED = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
 const ok = (id, result) => ({ jsonrpc: "2.0", id, result });
