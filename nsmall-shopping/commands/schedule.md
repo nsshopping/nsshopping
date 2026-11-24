@@ -1,5 +1,5 @@
 ---
-description: NS홈쇼핑 방송 편성표를 조회합니다 (예: /nsmall-shopping:schedule 내일 저녁)
+description: "NS홈쇼핑 방송 편성표를 조회합니다 (예: /nsmall-shopping:schedule 내일 저녁)"
 argument-hint: "[오늘|내일|YYYY-MM-DD] [TV|플러스|라이브] [지금|저녁 ...]"
 ---
 

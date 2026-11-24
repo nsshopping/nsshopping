@@ -7,9 +7,13 @@
  *   - search_products        : 편성표 방송 상품에서 키워드 검색 + m.nsmall.com 검색 링크
  *   - get_product_detail     : 편성표에서 상품코드로 가격/혜택 조회 + 상세 링크
  *
- * 프로토콜: MCP (JSON-RPC 2.0, 줄 단위 stdio). Node.js 18+ (내장 fetch) 필요.
+ * 실행 방식 (Node.js 18+, 외부 패키지 없음)
+ *   node index.mjs          : stdio (Claude Code 로컬 플러그인)
+ *   node index.mjs --http   : 원격 Streamable HTTP 서버 (POST /mcp, GET /healthz)
+ *                             PORT(기본 3000), HOST(기본 127.0.0.1), MCP_PATH(기본 /mcp)
  */
 import { createInterface } from "node:readline";
+import { createServer } from "node:http";
 
 // ---------------------------------------------------------------- 설정
 const env = process.env;
@@ -297,60 +301,127 @@ const TOOLS = [
   },
 ];
 
-// ---------------------------------------------------------------- MCP / JSON-RPC (stdio)
-const SERVER_INFO = { name: "nsmall", title: "NS홈쇼핑", version: "0.2.3" };
+// ---------------------------------------------------------------- MCP / JSON-RPC
+const SERVER_INFO = { name: "nsmall", title: "NS홈쇼핑", version: "0.3.0" };
 const SUPPORTED = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
-const send = (msg) => process.stdout.write(JSON.stringify(msg) + "\n");
-const reply = (id, result) => send({ jsonrpc: "2.0", id, result });
-const fail = (id, code, message) => send({ jsonrpc: "2.0", id, error: { code, message } });
+const ok = (id, result) => ({ jsonrpc: "2.0", id, result });
+const err = (id, code, message) => ({ jsonrpc: "2.0", id, error: { code, message } });
 
-async function handle(msg) {
-  const { id, method, params } = msg;
+/** JSON-RPC 메시지 1개 처리. 응답이 필요 없는 알림이면 null */
+async function dispatch(msg) {
+  const { id, method, params } = msg ?? {};
   const isRequest = id !== undefined && id !== null;
-  switch (method) {
-    case "initialize": {
-      const v = params?.protocolVersion;
-      return reply(id, {
-        protocolVersion: SUPPORTED.includes(v) ? v : SUPPORTED[0],
-        capabilities: { tools: { listChanged: false } },
-        serverInfo: SERVER_INFO,
-        instructions:
-          "NS홈쇼핑(m.nsmall.com) 방송 편성표와 방송 상품 정보를 조회합니다. 정보 조회 전용이며 주문/결제는 하지 않습니다.",
-      });
-    }
-    case "ping":
-      return reply(id, {});
-    case "tools/list":
-      return reply(id, { tools: TOOLS.map(({ handler, ...t }) => t) });
-    case "tools/call": {
-      const tool = TOOLS.find((t) => t.name === params?.name);
-      if (!tool) return fail(id, -32602, `알 수 없는 툴: ${params?.name}`);
-      try {
-        const text = await tool.handler(params?.arguments ?? {});
-        return reply(id, { content: [{ type: "text", text }] });
-      } catch (e) {
-        const reason = e?.name === "TimeoutError" ? "응답 시간 초과" : e?.message ?? String(e);
-        return reply(id, {
-          isError: true,
-          content: [{ type: "text", text: `NS홈쇼핑 데이터 조회 실패: ${reason}\n공식 편성표: ${CHANNELS.TV.page}` }],
+  if (!isRequest) return null; // notifications/initialized 등
+  try {
+    switch (method) {
+      case "initialize": {
+        const v = params?.protocolVersion;
+        return ok(id, {
+          protocolVersion: SUPPORTED.includes(v) ? v : SUPPORTED[0],
+          capabilities: { tools: { listChanged: false } },
+          serverInfo: SERVER_INFO,
+          instructions:
+            "NS홈쇼핑(m.nsmall.com) 방송 편성표와 방송 상품 정보를 조회합니다. 정보 조회 전용이며 주문/결제는 하지 않습니다.",
         });
       }
+      case "ping":
+        return ok(id, {});
+      case "tools/list":
+        return ok(id, { tools: TOOLS.map(({ handler, ...t }) => t) });
+      case "tools/call": {
+        const tool = TOOLS.find((t) => t.name === params?.name);
+        if (!tool) return err(id, -32602, `알 수 없는 툴: ${params?.name}`);
+        try {
+          const text = await tool.handler(params?.arguments ?? {});
+          return ok(id, { content: [{ type: "text", text }] });
+        } catch (e) {
+          const reason = e?.name === "TimeoutError" ? "응답 시간 초과" : e?.message ?? String(e);
+          return ok(id, {
+            isError: true,
+            content: [{ type: "text", text: `NS홈쇼핑 데이터 조회 실패: ${reason}\n공식 편성표: ${CHANNELS.TV.page}` }],
+          });
+        }
+      }
+      default:
+        return err(id, -32601, `지원하지 않는 메서드: ${method}`);
     }
-    default:
-      if (isRequest) return fail(id, -32601, `지원하지 않는 메서드: ${method}`);
+  } catch (e) {
+    return err(id, -32603, String(e?.message ?? e));
   }
 }
 
-const rl = createInterface({ input: process.stdin });
-rl.on("line", (line) => {
-  if (!line.trim()) return;
-  let msg;
-  try {
-    msg = JSON.parse(line);
-  } catch {
-    return fail(null, -32700, "Parse error");
+/** 단건/배치 처리. 응답할 것이 없으면 null */
+async function dispatchAll(payload) {
+  if (Array.isArray(payload)) {
+    const out = (await Promise.all(payload.map(dispatch))).filter(Boolean);
+    return out.length ? out : null;
   }
-  for (const m of Array.isArray(msg) ? msg : [msg]) handle(m).catch((e) => fail(m.id ?? null, -32603, String(e)));
-});
-rl.on("close", () => process.exit(0));
+  return dispatch(payload);
+}
+
+// ---------------------------------------------------------------- 전송: stdio
+function runStdio() {
+  const write = (m) => process.stdout.write(JSON.stringify(m) + "\n");
+  const rl = createInterface({ input: process.stdin });
+  rl.on("line", async (line) => {
+    if (!line.trim()) return;
+    let msg;
+    try {
+      msg = JSON.parse(line);
+    } catch {
+      return write(err(null, -32700, "Parse error"));
+    }
+    const res = await dispatchAll(msg);
+    if (res) write(res);
+  });
+  rl.on("close", () => process.exit(0));
+}
+
+// ---------------------------------------------------------------- 전송: Streamable HTTP (stateless)
+function runHttp() {
+  const port = Number(env.PORT ?? 3000);
+  const host = env.HOST ?? "127.0.0.1";
+  const mcpPath = env.MCP_PATH ?? "/mcp";
+  const MAX_BODY = 1024 * 1024;
+
+  const json = (res, status, body, extra = {}) => {
+    res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...extra });
+    res.end(body === undefined ? "" : JSON.stringify(body));
+  };
+
+  createServer((req, res) => {
+    const url = new URL(req.url ?? "/", "http://localhost");
+    if (url.pathname === "/healthz") return json(res, 200, { ok: true, version: SERVER_INFO.version });
+    if (url.pathname !== mcpPath) return json(res, 404, { error: "not found" });
+    // stateless 서버: 서버 → 클라이언트 SSE 스트림(GET)과 세션 종료(DELETE)는 지원하지 않음
+    if (req.method !== "POST") return json(res, 405, err(null, -32000, "Method not allowed"), { Allow: "POST" });
+
+    let size = 0;
+    const chunks = [];
+    req.on("data", (c) => {
+      size += c.length;
+      if (size > MAX_BODY) {
+        json(res, 413, err(null, -32600, "Request too large"));
+        req.destroy();
+      } else chunks.push(c);
+    });
+    req.on("end", async () => {
+      if (res.writableEnded) return;
+      let payload;
+      try {
+        payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      } catch {
+        return json(res, 400, err(null, -32700, "Parse error"));
+      }
+      const result = await dispatchAll(payload);
+      if (!result) return json(res, 202); // 알림만 온 경우
+      json(res, 200, result);
+    });
+  }).listen(port, host, () => {
+    console.error(`NS홈쇼핑 MCP 서버 (HTTP): http://${host}:${port}${mcpPath}`);
+  });
+}
+
+if (process.argv.includes("--http")) runHttp();
+else runStdio();

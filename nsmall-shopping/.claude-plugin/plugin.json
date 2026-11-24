@@ -1,10 +1,10 @@
 {
   "name": "nsmall-shopping",
   "displayName": "NS홈쇼핑",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "NS홈쇼핑에서 제공하는 상품을 손쉽게 볼 수 있습니다.",
   "author": {
-    "name": "NS홈쇼핑",
+    "name": "NS Shopping",
     "email": "nsai@nsmall.com",
     "url": "https://www.nsmall.com"
   },
@@ -17,12 +17,5 @@
     "쇼핑",
     "편성표",
     "shopping"
-  ],
-  "network": {
-    "hosts": [
-      "mapi.nsmall.com",
-      "m.nsmall.com",
-      "product-image.prod-nsmall.com"
-    ]
-  }
+  ]
 }
