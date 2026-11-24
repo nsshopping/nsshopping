@@ -12,7 +12,7 @@ Type=simple
 WorkingDirectory=/opt/nsmall-claude-mcp
 Environment=PORT=3100
 Environment=HOST=127.0.0.1
-Environment=MCP_PATH=/claude/mcp
+Environment=MCP_PATH=/mcp
 ExecStart=/usr/bin/node /opt/nsmall-claude-mcp/index.mjs --http
 Restart=always
 RestartSec=3

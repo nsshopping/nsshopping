@@ -1,5 +1,5 @@
 {
-  "mcpUrl": "https://image.nsmall.com/claude/mcp",
+  "mcpUrl": "https://ai-mcp.nsmall.com/mcp",
   "pluginJson": {
     "icon": "./logo.png",
     "documentationUrl": "https://m.nsmall.com",
@@ -7,6 +7,10 @@
     "privacyPolicyUrl": "https://m.nsmall.com/common/policy/privacy-policy",
     "termsOfServiceUrl": "https://m.nsmall.com/common/terms/nsmall-terms"
   },
-  "removeFromPluginJson": ["network"],
-  "removePaths": ["server"]
+  "removeFromPluginJson": [
+    "network"
+  ],
+  "removePaths": [
+    "server"
+  ]
 }
